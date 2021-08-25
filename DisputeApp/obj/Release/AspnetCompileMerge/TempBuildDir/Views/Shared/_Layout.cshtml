@@ -1,0 +1,247 @@
+﻿@{
+    if ((Session["name"] == null) || (Session["password"] == null))
+    {
+        if (@ViewBag.Title != "Login")
+        {
+            <script>location.replace("/Home/Login/")</script>
+        }
+
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    
+    <link rel="stylesheet" href="~/Content/Login.css"/>
+    <link rel="stylesheet" href="~/Content/reports.css" />
+    <link rel="stylesheet" href="~/Content/admin.css" />
+    <link rel="icon" href="~/icons/fav.ico">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+</head>
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="container">
+            <div class="">
+                <ul class="">
+                    <li>@Html.ActionLink("بنك فيصل الاسلامي", "login", "Home")</li>
+                    @if (@ViewBag.Title == "Index")
+                    {
+                        <li>@Html.ActionLink("تسجيل خروج", "Logout", "Home")</li>
+                    }
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="box SearchRightBar">
+        <div class="box-header">
+            <span class=""><img src="~/icons/arrow.png" /></span>
+            <font>تاريخ المنازعة</font>
+            <input type="text" name="branchCode" placeholder="كود الفرع" />
+            <input type="date" name="TransDate" placeholder="search" />
+            <img src="~/icons/search.png" onclick="obj.searchFilter()" />
+        </div>
+        <div class="box-body"></div>
+        <div class="box-footer"></div>
+    </div>  
+    <div class=" body-content">
+        @RenderBody()
+    </div>
+
+
+    <div class="box navbar-fixed-bottom foot">
+        <div class="box-header box-body">
+            <label style="color:white;margin:4px;">منازعات الفرع</label>
+            <input type="text" placeholder="كود الفرع" class="branch-form" />
+            <button onclick="obj.Branchsearch()">بحث</button>
+            <font>
+                <img src="~/icons/up.png"   onclick="$('.Branchsearch').css({ height: '400px' })" align="left" style="margin:5px;width:20px;height:20px;" />
+                <img src="~/icons/down.png" onclick="$('.Branchsearch').css({ height:'20px' })" align="left" style="margin:5px;width:20px;height:20px;" />
+            </font>
+        </div>
+        <div class="box-body"></div>
+        <div class="box-data Branchsearch">
+            <table class='table table-responsive table-bordered'><tr class='THR'><td>الرقم التعريفي</td><td>الموظف</td><td>الفرع</td><td>القيمة</td><td>العملة</td><td>التاريخ</td><td>حالة المنازعة</td></tr></table>            
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <script>
+        
+        obj = new Api();
+        Window = new Windows();
+        function Api() {
+            this.ApiAddress = '/Api';
+            this.transState = { 'W': 'في الانتظار', 'S': 'ناجحة', 'UR': 'تحت المعاينة', 'UP': 'تحت المعالجة', 'RD': 'سوف يتم الرد','O':'تمت رؤيتها' };
+            this.search = function () {
+                
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $(".showWindow").remove();
+                $.ajax({
+                    url: obj.ApiAddress + '/Search?searchKey=send_date&searchValue='+$(".SearchRightBar input[name=TransDate]").val(),
+                    method: '',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                $('.messageBox').remove();
+                                $(".SearchRightBar .box-body").html("<div><h4> النتائج " + res[i].length + "</h4></div><table class='table table-responsive'><tr class='THR'><td>رقم الحركة</td><td>القيمة</td><td>الحالة</td></tr></table>");
+                                for (var j in res[i]) {
+                                    $(".SearchRightBar .box-body table").append("<tr><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["PAY_AMT"] + "</td><td><span class='" + res[i][j]["state"] + "'>" + obj.transState[res[i][j]["state"]] + "</span></td></tr>");
+                                }
+
+                            } else {
+                                notification.msg('success', 'تم البحث', 'لا توجد منازعات اليوم');
+                                $(".SearchRightBar .box-body").html('');
+                            }
+                        }
+                    }
+                });
+            };
+
+            this.searchFilter = function () {
+
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $(".SearchRightBar input[name=branchCode]").val($(".SearchRightBar input[name=branchCode]").val().trim());
+                if($(".SearchRightBar input[name=branchCode]").val().length > 0){
+                    $.ajax({
+                        url: obj.ApiAddress + '/Search?processDate=' + $(".SearchRightBar input[name=TransDate]").val() + '&branch=' + $(".SearchRightBar input[name=branchCode]").val(),
+                        method: '',
+                        success: function (res) {
+                            for (var i in res) {
+                                if (res[i].length > 0) {
+                                    $('.messageBox').remove();
+                                    $(".SearchRightBar .box-body").html("<div><h4> النتائج " + res[i].length + "</h4></div><table class='table table-responsive'><tr class='THR'><td>رقم الحركة</td><td>القيمة</td><td>الحالة</td></tr></table>");
+                                    for (var j in res[i]) {
+                                        $(".SearchRightBar .box-body table").append("<tr><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["PAY_AMT"] + "</td><td><span class='" + res[i][j]["state"] + "'>" + obj.transState[res[i][j]["state"]] + "</span></td></tr>");
+                                    }
+
+                                } else {
+                                    notification.msg('success', 'تم البحث', 'لا توجد نتائج');
+                                    $(".SearchRightBar .box-body").html('');
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    notification.msg('faild', 'فشلت العملية', 'ادخل كود الفرع');
+                }
+                
+            };
+
+            this.Branchsearch = function () {
+                var tmp = document.getElementsByClassName("branch-form");
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $.ajax({
+                    url: obj.ApiAddress + '/Search?searchKey=branch&searchValue=' + tmp[0].value,
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                $('.messageBox').remove();
+                                $(".Branchsearch").css({ height: '400px' });
+                                $(".Branchsearch").html("<table class='table table-responsive table-bordered'><tr class='THR'><td>الرقم التعريفي</td><td>الموظف</td><td>الفرع</td><td>القيمة</td><td>العملة</td><td>التاريخ</td><td>حالة المنازعة</td></tr></table>");                                
+                                for (var j in res[i]) {
+                                    DayMonth = res[i][j]["send_date"].slice(0, length - 3);
+                                    res[i][j]["send_date"] = DayMonth + "-20" + res[i][j]["send_date"].slice(res[i][j]["send_date"].length - 2, res[i][j]["send_date"].length);
+                                    if (res[i][j]["PAY_CURR"] == 938) { res[i][j]["PAY_CURR"] = "SDG"; } 
+                                    $(".Branchsearch table").append("<tr><td class='" + res[i][j]["state"] + "' >" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["user_name"] + "</td><td>" + res[i][j]["branch"] + "</td><td>" + res[i][j]["PAY_AMT"] + "</td><td>" + res[i][j]["PAY_CURR"] + "</td><td>" + res[i][j]["send_date"] + "</td><td>" + obj.transState[res[i][j]["state"]] + "</td></tr>");
+                                }
+                            }
+                            else {
+                                notification.msg('faild', 'تم البحث', 'لا توجد نتائج');
+                            }
+                        }
+                    }
+                });
+            };
+
+            this.viewRrn = function (id) {
+                notif.loading('جاري التحميل');
+                $.ajax({
+                    url: obj.ApiAddress + '/Search?searchKey=id&searchValue=' + id,
+                    method: 'get',
+                    success: function (res) {
+                        $('.messageBox').remove();
+                        for (var i in res) {
+                            $(".transactionInfo").remove();
+                            $(".window").prepend('<div class="box transactionInfo"> <div class="box-header"><font>transaction info</font></div><div class="box-body"><table class=""></table></div></div>');
+                            for (var j in res[i]) {
+                                $(".transactionInfo .box-body table").html('\
+                                        <tr><td><font>branch</font> ' + res[i][j]["branch"] + '</td><td><font>user</font> ' + res[i][j]["user_name"] + '</td></tr>\
+                                        <tr><td><font>date</font> 27-Apr-2021</td><td>' + res[i][j]["PAY_AMT"] + " " + res[i][j]["PAY_CURR"] + '</td></tr>\
+                                        <tr ><td colspan="2">' + res[i][j]["state"] + '</td></tr>\
+                                        <tr class="commentTr"><td colspan="2">' + res[i][j]["feedback"] + '</td></tr>\
+                                        <tr ><td colspan="2"><select><option value="S">success</option><option value="RD">send to manager</option><option value="UV">under review</option><option value="UP">under process</option></select></td></tr>\
+                                        <tr id=""><td colspan="2"><input type="text" class="comment" placeholder="comment"/><button>save</button><button onclick="$(\'.transactionInfo\').remove();" >close</button></td></tr>');
+                            }
+                        }
+                    }
+                });
+            };
+
+            this.showWindow = function (rrn,send_date,amount,amountType,user,branch,comment) {
+              
+                $(".showWindow").remove();
+                var x = '<div class="showWindow">\
+                        <div class="showWindow-header">\
+                            <img src="/icons/black-x-mark.png" onclick="Window.Close(this)" />\
+                            <span></span>\
+                        </div>\
+                        <div class="showWindow-body">\
+                            <h4><font>رقم المنازعة </font>'+rrn+'</h4>\
+                            <table class=" table-responsive">\
+                                <tr><td><font>تاريخ الارسال</font></td><td>' + send_date + '</td></tr>\
+                                <tr><td><font>قيمة المنازعة</font></td><td>' + amount +" "+ amountType + '</td></tr>\
+                                <tr><td><font>المستخدم</font></td><td>' + user + '</td><td><font>كود الفرع</font></td><td>' + branch + '</td></tr>\
+                                <tr class="commentRow"><td><h4>' + comment + '</h4></td></tr>\
+                            </table>\
+                        </div>\
+                        </div>';
+                $("body").prepend(x);
+
+            };
+            
+        }
+
+        function Windows() {
+            this.Close = function (element) {
+                var x = element.parentNode;
+                x = x.parentNode;
+                $(x).remove();
+            }
+        }
+
+        SearchRightBarVar = 10;
+        $(".SearchRightBar .box-header span").click(function () {
+            RightBarSlider();
+        });
+
+        function RightBarSlider() {
+            $(".SearchRightBar").css({ "marginRight": SearchRightBarVar + "px" });
+
+            switch (SearchRightBarVar) {
+                case 10:
+                    $(".SearchRightBar .box-header span img").css({ "transform": "rotate(90deg)" });
+                    SearchRightBarVar = -370;
+                    break;
+                case -370:
+                    $(".SearchRightBar .box-header span img").css({ "transform": "rotate(270deg)" });
+                    SearchRightBarVar = 10;
+                    break;
+                default:
+                    SearchRightBarVar = 10;
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
+<script src="~/Scripts/notification.js" type="text/javascript"></script>

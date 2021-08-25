@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+
+    <link rel="stylesheet" href="~/Content/Login.css" />
+    <link rel="icon" href="~/icons/fav.ico">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+</head>
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="container">
+            <div class="">
+                <ul class="">
+                    <li>@Html.ActionLink("بنك فيصل الاسلامي", "Index", "Home")</li>                  
+                </ul>
+            </div>
+        </div>
+    </div>
+
+ 
+    <div class="body-content">
+        @RenderBody()
+    </div>
+
+
+    <div class="box navbar-fixed-bottom foot">
+        
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,189 @@
+﻿@font-face{
+    font-family:Almarai;
+    src:url(../fonts/Almarai/Almarai-Regular.ttf)format('truetype');
+}
+@font-face{
+    font-family:Almarai-light;
+    src:url(../fonts/Almarai/Almarai-Light.ttf)format('truetype');
+}
+ .adminpage{
+    direction:ltr;
+    text-align:left;
+}
+.leftBar{
+    background:transparent;
+    position:absolute;
+    width:140px;
+    padding:0px;
+    margin-left:10px;
+    z-index:3000;
+}
+.adminpage .leftBar ul{
+    list-style:none;
+    text-align:left;
+    padding:0px;
+    width:100%;
+    font-family:Almarai;
+}
+.adminpage .leftBar ul li{
+    border:1px solid lightgray;
+    text-align:left;
+    padding:2px;
+    border-radius:2px;
+    background:white;
+    margin:1px;
+    font-weight:100;
+}
+.adminpage .leftBar ul li img{
+    width:23px;
+    height:23px;
+    margin:3px;
+}
+.adminpage .leftBar ul li ul{
+    margin-right:-100px;
+    margin-top:-20px;
+    padding:0px;
+    background:white;
+    position:absolute;
+    display:none;
+}
+.adminpage .leftBar ul li ul li{
+    padding:4px;
+}
+.adminpage .leftBar ul li ul li:hover{
+    background:#31579c;
+    color:white;
+}
+.adminpage .leftBar ul li:hover ul{
+    display:block;
+}
+.adminpage .leftBar ul .new-trans-li{
+    color:#09ad3e;
+    font-weight:700;
+    font-size:16px;
+}
+.workBox{
+    margin-left:200px;
+    margin-top:-30px;
+    direction:ltr;
+    text-align:left;
+    width:500px;
+    box-shadow:0px 0px 6px lightgray;
+    background:white;
+    position:absolute;
+    border-radius:3px;
+}
+.workBox .workBox-header{
+    direction:rtl;
+    text-align:right;
+    padding:0px;
+    margin:0px;
+}
+
+.workBox .workBox-header font{
+    font-weight:900;
+    margin:5px;
+    padding:4px;
+    display:block;
+}
+.workBox .workBox-header input{
+    border:1px solid lightgray;
+    margin:3px;
+    padding:6px;
+}
+.workBox .workBox-header img{
+    width:25px;
+    height:25px;
+}
+.workBox .workBox-header button{
+    background:#31579c;
+    border:0px;
+    padding:6px;
+    width:80px;
+    display:inline;
+    color:white;
+}
+.workBox .workBox-header h4{
+    padding-left:10px;
+    text-align:left;
+    font-weight:200;
+    font-size:15px;
+    color:#31579c;
+}
+.workBox .workBox-body{
+    overflow-y:scroll;
+    max-height:400px;
+    margin:0px;
+    background:#fff;
+    transition:height .6s;
+}
+
+.workBox .workBox-body table{
+    list-style:none;
+    padding:0px;
+    margin:0px;
+    width:100%;
+}
+.workBox .workBox-body tr {
+    padding:7px;
+    background:transparent;
+    border-top:1px solid #f3f3f3;
+    cursor:text;
+}
+.workBox .workBox-body tr td{
+    padding:5px;
+}
+.workBox .workBox-body tr td img{
+    float:right;
+    cursor:pointer;
+}
+
+/*dispute-action-div*/
+.dispute-action-div{
+    width:400px;
+    position:absolute;
+    background:white;
+    box-shadow:0px 0px 3px lightgray;
+    border-radius:3px;
+    margin-left:30%;
+    z-index:3001;
+}
+.dispute-action-div-body{
+    padding:4px;
+    text-align:right;
+    direction:rtl;
+}
+.dispute-action-div-body h4{
+    font-size:15px;
+    font-weight:700;
+    text-align:left;
+    margin-left:5px;
+}
+.dispute-action-div-body h4 font{
+    margin:6px;
+    font-weight:600;
+}
+.dispute-action-div-body font-face{
+    font-weight:600;
+}
+.dispute-action-div-body select,.dispute-action-div-body input{
+    width:300px;
+    display:block;
+    padding:6px;
+    border:1px solid lightgray;
+    margin-top:7px;
+    margin-bottom:4px;
+}
+.dispute-action-div-body button{
+    width:100px;
+    padding:2px;
+    margin:2px;
+    background:white;
+    border:1px solid #31579c;
+    transition:background .5s;
+
+}
+.dispute-action-div-body button:hover{
+    background:#31579c;
+    color:white;
+}

@@ -1,0 +1,36 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<center>
+    <div class="login">
+        <h3>تسجيل الدخول بحساب الأيمال</h3>
+        @using (Html.BeginForm("CheckLogin", "Home"))
+        {
+            <input type="text" placeholder="Imal user name" name="userName" />
+            <input type="password" placeholder="Imal user password" name="userPassword" />
+            <input type="submit" value="Login" />
+            <input type="reset" value="Clear" />
+        }
+        
+    </div>
+</center>
+@section scripts{
+    <script>
+        function login() {
+            $.ajax({
+                url: '',
+                method: 'get',
+                success: function (res) {
+                    if (res) {
+                        alert("welcome");
+                    } else {
+                        alert("invalid user name");
+                    }
+                }
+            });
+        }
+    </script>    
+}

@@ -1,0 +1,98 @@
+﻿
+@{
+    ViewBag.Title = "Monitor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    if ((Session["name"] == null) || (Session["password"] == null))
+    {
+        <script>location.replace("Login/")</script>
+    }
+}
+<div class="Monitor">
+    <div class="MonitorleftBar">
+        <ul>
+            <li onclick="admin.getTrans('W');">لم يتم فتحها</li>
+            <li onclick="admin.getTrans('S');">ناجحة</li>
+            <li onclick="admin.getTrans('UP');">تحت المعالجة</li>
+            <li onclick="admin.getTrans('UR');">تحت المعاينة</li>
+        </ul>
+    </div>
+    <div class="MonitorWindow"></div>
+</div>
+
+@section scripts{
+    <script>
+        admin = new Admin();
+        //var Inter = setInterval(function () { admin.IntervalTransQuery() }, 5000);
+
+        function Admin() {
+            this.lastTransId = 0;
+            this.TotalNewTrans = 0;
+            this.ApiAddress = '/Api';
+            this.reFresh = function () {
+                notification.loading('جاري تحديث البيانات', 'الرجاء الانتظار');
+                admin.getNewTrans();
+                admin.getUnderReviewTrans();
+                admin.getUnderProcessTrans();
+                $(".messageBox").remove();
+            };
+
+            this.getTrans = function (STATE) {
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $.ajax({
+                    url: admin.ApiAddress + '/Search?searchKey=state&searchValue=' + STATE,
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {
+                            $(".MonitorWindow").html("<table class='table table-responsive table-bordered'><tr class='THR'><td>الرقم التعريفي</td><td>الحساب</td><td>الفرع</td><td>المبلغ</td><td>التعليق</td><td>التاريخ</td></tr></table>");
+                            if (res[i].length > 0) {
+                                $(".messageBox").remove();
+                                for (var j in res[i]) {
+                                    $(".MonitorWindow table").append("<tr onclick=''><td class='" + res[i][j]["state"] + "' >" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["user_name"] + "</td><td>" + res[i][j]["branch"] + "</td><td>" + res[i][j]["PAY_AMT"] + " "+res[i][j]["PAY_CURR"]+ "</td><td>" + res[i][j]["feedback"] + "</td><td>" + res[i][j]["send_date"] + "</td></tr>");
+                                }
+                                admin.TotalNewTrans = res[i].length;
+                                admin.lastTransId = res[i][j]["id"];
+                            } else {
+                                notification.msg('faild', 'تم البحث', 'لا توجد نتائج');
+                            }
+
+                        }
+                    }
+                });
+            };
+
+            
+            this.search = function () {
+                var tmp = document.getElementsByClassName("search-form");
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $(".showWindow").remove();
+                $.ajax({
+                    url: admin.ApiAddress + '/Search?searchKey=' + tmp[0].value + '&searchValue=' + tmp[1].value,
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                $(".messageBox").remove();
+                                $(".AdminSearch .box-body").html("<ul></ul>");
+                                for (var j in res[i]) {
+                                    $(".AdminSearch .box-body ul").append("<li onclick='admin.OpenTran(\"search\",\"" + res[i][j]["rrn"] + "\",\"" + res[i][j]["send_date"] + "\",\"" + res[i][j]["PAY_AMT"] + "\",\"" + res[i][j]["PAY_CURR"] + "\",\"" + res[i][j]["user_name"] + "\",\"" + res[i][j]["branch"] + "\")'><h4>" + res[i][j]["rrn"] + "</h4>" + res[i][j]["user_name"] + "<font>" + res[i][j]["send_date"] + "</font><span class='" + res[i][j]["state"] + "'>" + obj.transState[res[i][j]["state"]] + "</span></li>");
+                                }
+                                $(".AdminSearch .box-header h5").text("النتائج " + res[i].length)
+                            }
+                            else {
+                                notification.msg('faild', 'تم البحث', 'لا توجد نتائج');
+                                $(".AdminSearch .box-body").html("<ul></ul>");
+                            }
+                        }
+                    }
+                });
+            };
+
+
+        }
+    </script>
+
+}
+
+
+
+

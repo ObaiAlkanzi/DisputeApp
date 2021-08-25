@@ -1,0 +1,379 @@
+﻿
+@{
+    ViewBag.Title = "Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    if ((Session["name"] == null) || (Session["password"] == null))
+    {
+        <script>location.replace("/Home/Login/")</script>
+    }
+    else
+    {
+
+        <div class="row adminpage">
+            <div class="leftBar">
+                <ul>
+                    <li>
+                        search<img src="~/icons/search.png" />
+                        <ul>
+                            <li onclick="admin.QuickSearchForm();">Quick Search</li>
+                            <li onclick="admin.DateSearchForm();">Search By Date</li>
+                        </ul>
+                    </li>
+                    @{
+                        if ((Session["accessLevel"].ToString() == "4") || (Session["accessLevel"].ToString() == "3"))
+                        {
+                            <li>
+                                filter<img src="~/icons/filter.png" />
+                                <ul>
+                                    <li onclick="admin.filter('S','Success Disputes');">Success</li>
+                                    <li onclick="admin.filter('UP','Under Process Disputes');">Under Process</li>
+                                    <li onclick="admin.filter('UR','Under Review Disputes');">Under Review</li>
+                                </ul>
+                            </li>
+                            <li onclick="admin.filter('W','New Disputes')" class="new-trans-li"><font></font><img src="~/icons/notif.png" /></li>
+                            <li >users<img src="~/icons/add.png" />
+                                <ul>
+                                    <li onclick="admin.userForm();">new user</li>
+                                    <li onclick="admin.getUsers()">users</li>
+                                </ul> 
+                            </li>
+                        }
+                        if (Session["accessLevel"].ToString() == "3")
+                        {
+                            <li>Reports <img src="~/icons/report.png" /></li>
+                        }
+                    }
+                    
+                    <li onclick='alert(@Session["accessLevel"])'>
+                        User <img src="~/icons/user.png" />
+                        <ul>
+                            <li>@Session["name"]</li>
+                            <li>Change<img src="~/icons/setting.png" /></li>
+                        </ul>
+                    </li>
+                    
+                    <li>@Html.ActionLink("Logout", "Logout", "Home")<img src="~/icons/close.png" /></li>
+                </ul>
+            </div>
+            @{
+                if ((Session["accessLevel"].ToString() == "1"))
+                {
+                    <div class="col-lg-8 col-sm-8">
+                        <div class="box">
+                            <div class="transForm">
+                                <h3>ارسال المنازعات</h3>
+                                <h4>يتم ارسال المنازعة بتحديد نوع المنازعة وادخال رقم الحركة</h4>
+                                <div>
+                                    <!-- 1 for Forri and 2 For pay_trans -->
+                                    <font>نوع المنازعة</font>
+                                    <input type="radio" value="1" name="TransTypeRadio" isChecked="true" /><label>فوري</label>
+                                    <input type="radio" value="2" name="TransTypeRadio" isChecked="false" /><label>تحصيل</label>
+                                    <font>كود الفرع</font>
+                                    <input type="text" id="branchCode" placeholder="" />
+                                    <font>رقم الحركة</font>
+                                    <input type="text" id="rrn" placeholder="" />
+                                    <input type="button" value="ارسال" onclick="index.addTrans()" />
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                }
+                <div class="row admin-main-row">
+                    <div class="workBox">
+                        <div class="workBox-header">
+
+                        </div>
+                        <div class="workBox-body">
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+@section scripts{
+<script>
+        admin = new Admin();
+        admin.getNewTrans();
+        var Inter = setInterval(function () { admin.IntervalTransQuery() }, 5000);
+
+        function Admin() {
+            this.lastTransId = 0;
+            this.TotalNewTrans = 0;
+            this.ApiAddress = '/Api';
+            this.IconsAddres = '';
+
+            this.IntervalTransQuery = function () {
+                $.ajax({
+                    url: admin.ApiAddress + '/Search?id=' + admin.lastTransId + '&state=W',
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                for (var j in res[i]) {
+
+                                }
+                                admin.lastTransId = res[i][j]["id"];
+                                admin.TotalNewTrans = admin.TotalNewTrans + res[i].length;
+                                $(".new-trans-li font").text("+"+admin.TotalNewTrans);
+                            }
+                        }
+                    }
+                });
+            };
+            this.getNewTrans = function () {
+                $.ajax({
+                    url: admin.ApiAddress + '/Search?searchKey=state&searchValue=W',
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {                            
+                            if (res[i].length > 0) {
+                                var c = 0;
+                                for (var j in res[i]) {
+                                    c = c + 1;
+                                }
+                                admin.TotalNewTrans = res[i].length;
+                                admin.lastTransId = res[i][j]["id"];
+                                $(".new-trans-li font").text("+"+admin.TotalNewTrans);
+                            }else{
+                                $(".new-trans-li font").text("0");
+                            }
+
+                        }
+                    }
+                });
+            };
+
+            this.filter = function (TransState,title) {
+                $(".workBox div").html("");
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $(".showWindow").remove();
+                $.ajax({
+                    url: admin.ApiAddress + '/Search?searchKey=state&searchValue=' + TransState,
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                $(".messageBox").remove();
+                                $(".workBox .workBox-header").html("<h4>"+title+" "+res[i].length+"</h4>");
+                                $(".workBox .workBox-body").html("<table></table>");
+                                for (var j in res[i]) {
+                                    //$(".workBox .workBox-body ul").append("<li onclick='admin.OpenTran(\"search\",\"" + res[i][j]["rrn"] + "\",\"" + res[i][j]["send_date"] + "\",\"" + res[i][j]["PAY_AMT"] + "\",\"" + res[i][j]["PAY_CURR"] + "\",\"" + res[i][j]["user_name"] + "\",\"" + res[i][j]["branch"] + "\")'><h4>" + res[i][j]["rrn"] + "</h4>" + res[i][j]["user_name"] + "<font>" + res[i][j]["send_date"] + "</font><span class='" + res[i][j]["state"] + "'>" + obj.transState[res[i][j]["state"]] + "</span></li>");
+                                    switch(accessLevel){
+                                        case 4:
+                                            $(".workBox .workBox-body table").append("<tr ><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["send_date"] + "</td><td>" + res[i][j]["employee"] + "</td><td>" + obj.transState[res[i][j]["state"]] + "</td><td><img src='"+admin.IconsAddres+"/icons/see.png' onclick='admin.commentForm(\"" + res[i][j]["rrn"] + "\",\"" + res[i][j]["user_name"] + "\",\"" + res[i][j]["PAY_AMT"] + "\",this)'/></td></tr>");
+                                            break;
+                                        default:
+                                            $(".workBox .workBox-body table").append("<tr><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["send_date"] + "</td><td>" + res[i][j]["employee"] + "</td><td>" + obj.transState[res[i][j]["state"]] + "</td><td><img src='"+admin.IconsAddres+"/icons/see.png' onclick=''/></td></tr>");
+                                            break;
+                                    }
+                                }
+                            }
+                            else {
+                                notification.msg('faild', 'تم البحث', 'لا توجد نتائج');
+                                //$(".filter .box-header h5").text("النتائج " + res[i].length)
+                            }
+                        }
+                    }
+                });
+            };
+
+
+
+            this.sendComment = function (rrn) {
+                var tmp = document.getElementsByClassName("reply-field");
+                $.ajax({
+                    url: admin.ApiAddress + '/Reply?R=' + rrn + '&S=' + tmp[0].value + '&C=' + tmp[1].value,
+                    method: 'get',
+                    success: function (res) {
+                        if (res) {
+                            notification.msg('success', 'تمت العملية', 'تم ارسال الرد الى الموظف');
+                            $(".dispute-action-div").remove();
+                            $(element).remove();
+                        } else {
+                            notification.msg('faild', 'فشل العملية', 'لم يتم ارسال الرد');
+                        }
+                    }
+                });
+                
+            };
+            
+
+            this.QuickSearchForm = function () {
+                
+                $(".workBox div").html("");
+                $(".workBox .workBox-header").html("<font>الرقم التعريفي</font><input type='text' placeholder=''/><button onclick='admin.QuickSearch()'>search</button>");
+            };
+
+            this.DateSearchForm = function () {
+                $(".workBox div").html("");
+                $(".workBox .workBox-header").html('<font>تاريخ المنازعة</font><input type="date" name="TransDate" placeholder="search" /><img src="'+ admin.IconsAddres +'/icons/search.png" onclick="admin.DateSearchFormAction()" />');
+            }
+
+            this.DateSearchFormAction = function () {
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $(".showWindow").remove();
+                $.ajax({
+                    url: obj.ApiAddress + '/Search?searchKey=send_date&searchValue='+$(".workBox .workBox-header input[name=TransDate]").val(),
+                    method: '',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                $('.messageBox').remove();
+                                $(".workBox .workBox-body").html("<table></table>");
+                                for (var j in res[i]) {
+                                    switch(accessLevel){
+                                        case 4:
+                                            $(".workBox .workBox-body table").append("<tr><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["send_date"] + "</td><td>" + res[i][j]["employee"] + "</td><td>" + obj.transState[res[i][j]["state"]] + "</td><td><img src='"+ admin.IconsAddres +"/icons/see.png' onclick='admin.commentForm(\"" + res[i][j]["rrn"] + "\",\"" + res[i][j]["user_name"] + "\",\"" + res[i][j]["PAY_AMT"] + "\")'/></td></tr>");
+                                            break;
+                                        default:
+                                            $(".workBox .workBox-body table").append("<tr><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["send_date"] + "</td><td>" + res[i][j]["employee"] + "</td><td>" + obj.transState[res[i][j]["state"]] + "</td><td><img src='"+ admin.IconsAddres +"/icons/see.png' onclick=''/></td></tr>");
+                                            break;
+                                    }
+                                }
+
+                            } else {
+                                notification.msg('success', 'تم البحث', 'لا توجد نتائج');
+                                $(".SearchRightBar .box-body").html('');
+                            }
+                        }
+                    }
+                });
+            };
+
+            this.QuickSearch = function () {
+                var rrn = $(".workBox .workBox-header input").val();
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $(".showWindow").remove();
+                $.ajax({
+                    url: admin.ApiAddress + '/Search?searchKey=rrn&searchValue=' + rrn,
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                $(".messageBox").remove();
+                                $(".workBox .workBox-body").html("<table></table>");
+                                for(var j in res[i]){
+                                    switch(accessLevel){
+                                        case 4:
+                                            $(".workBox .workBox-body table").append("<tr><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["send_date"] + "</td><td>" + res[i][j]["employee"] + "</td><td>" + obj.transState[res[i][j]["state"]] + "</td><td><img src='"+ admin.IconsAddres +"/icons/see.png' onclick='admin.commentForm(\"" + res[i][j]["rrn"] + "\",\"" + res[i][j]["user_name"] + "\",\"" + res[i][j]["PAY_AMT"] + "\")'/></td></tr>");
+                                            break;
+                                        default:
+                                            $(".workBox .workBox-body table").append("<tr><td>" + res[i][j]["rrn"] + "</td><td>" + res[i][j]["send_date"] + "</td><td>" + res[i][j]["employee"] + "</td><td>" + obj.transState[res[i][j]["state"]] + "</td><td><img src='"+ admin.IconsAddres +"/icons/see.png' onclick=''/></td></tr>");
+                                            break;
+                                    }
+                                }
+                                
+
+                            }
+                            else {
+                                notification.msg('success', 'تم البحث', 'لا توجد نتائج');
+                                $(".workBox .workBox-body").html("");
+                            }
+                        }
+                    }
+                });
+            };
+
+            this.commentForm = function (rrn,user,pay_amount,element) {
+                $(".dispute-action-div").remove();
+                var x = '<div class="dispute-action-div">\
+                        <div class="dispute-action-div-body">\
+                            <h4>'+ rrn + '</h4>\
+                            <h4><font>'+ user + '</font><font>' + pay_amount + '</font></h4>\
+                            <font>حالة المنازعة</font>\
+                            <select class="reply-field">\
+                                <option value="S">ناجحة</option>\
+                                <option value="UP">تحت المعالجة</option>\
+                                <option value="UR">تحت المعاينة</option>\
+                                <option value="RD">ارسال الى</option>\
+                            </select>\
+                            <font>تعليق</font>\
+                            <input type="text" placeholder="" class="reply-field"/>\
+                            <button onclick="admin.sendComment('+ rrn + ')">تم</button><button onclick="$(\'.dispute-action-div\').remove();">الغاء</button>\
+                        </div>\
+                      </div>';
+                $(".admin-main-row").append(x);
+            };
+
+            this.userForm = function () {
+                $(".workBox div").html("");
+                $(".workBox .workBox-header").html("<font>اسم حساب المستخدم</font><input type='text' placeholder='' id='useName' /><button onclick='admin.addUser()'>add</button>");
+            };
+
+            this.addUser = function () {
+
+                if(window.confirm("add this user ?!")){
+                    notification.loading('جاري الارسال', 'الرجاء الانتظار');
+                    $.ajax({
+                        url: admin.ApiAddress + '/Users?userName=' + $("#useName").val(),
+                        method: 'get',
+                        success: function (res) {
+                            if (res) {
+                                $("#useName").val('');
+                                notification.msg('نجحت العملية', 'تمت اضافة المستخدم بنجاح');
+                            }
+                            else {
+                                notification.msg('faild', 'تمت العملية', 'فشل اضافة المستخدم');
+
+                            }
+                        }
+                    });
+                }
+
+            };
+
+            this.getUsers = function(){
+                $(".workBox div").html("");
+                notification.loading('جاري البحث', 'الرجاء الانتظار');
+                $(".showWindow").remove();
+                $.ajax({
+                    url: admin.ApiAddress + '/Users',
+                    method: 'get',
+                    success: function (res) {
+                        for (var i in res) {
+                            if (res[i].length > 0) {
+                                $(".messageBox").remove();
+                                $(".workBox .workBox-body").html("<table></table>");
+                                for(var j in res[i]){
+                                    switch(accessLevel){
+                                        case 4:
+                                            $(".workBox .workBox-body table").append("<tr><td>" + res[i][j]["name"] + "</td><td>" + res[i][j]["accessLevel"] + "</td><td>" + res[i][j]["creation_date"] + "</td><td><img src='"+ admin.IconsAddres +"/icons/see.png' onclick='admin.test()'/></td></tr>");
+                                            break;
+                                        default:
+                                            $(".workBox .workBox-body table").append("<tr><td>" + res[i][j]["name"] + "</td><td>" + res[i][j]["accessLevel"] + "</td><td>" + res[i][j]["creation_date"] + "</td><td><img src='"+ admin.IconsAddres +"/icons/see.png' onclick=''/></td></tr>");
+                                            break;
+                                    }
+                                }
+                                
+
+                            }
+                            else {
+                                notification.msg('success', 'تم البحث', 'لا توجد نتائج');
+                                $(".workBox .workBox-body").html("");
+                            }
+                        }
+                    }
+                });
+            };
+
+            this.updateUserForm = function(){
+                $(".workBox div").html("");
+                $(".workBox .workBox-header").html("<font>الرقم التعريفي</font><input type='text' placeholder=''/><button onclick='admin.QuickSearch()'>search</button>")
+            };
+        }
+</script>
+@if ((Session["accessLevel"].ToString() == "1"))
+{
+    <script>userName = '@Session["name"]'</script>
+    <script src="~/Scripts/Employee.js" type="text/javascript"></script>
+}
+else
+{
+    <script>accessLevel = @Session["accessLevel"].ToString();</script>    
+}
+
+}

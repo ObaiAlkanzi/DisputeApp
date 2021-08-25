@@ -1,0 +1,36 @@
+﻿.login{
+    padding:10px;
+    padding-right:30px;
+    background:white;
+    width:600px;
+    font-family:'Tajawal', sans-serif;
+    margin-top:70px;
+    text-align:center;
+    box-shadow:0px 0px 7px lightgray;
+}
+.login h3{
+    margin-bottom:20px;
+    font-weight:200;
+}
+.login input{
+    font-size:16px;
+    font-weight:300;
+    width:360px;
+    padding:7px;
+    background:#d3d6d9;
+    direction:ltr;
+    color:black;
+    border:1px solid lightgray;
+}
+.login input[type=text],.login input[type=password]{
+    background:white;
+}
+.login input[type=submit]{
+    border-radius:3px;
+    padding:6px;
+}
+.login input[type=reset]{
+    border-radius:3px;
+    padding:6px;
+
+}

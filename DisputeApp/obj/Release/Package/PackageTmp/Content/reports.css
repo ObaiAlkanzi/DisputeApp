@@ -1,0 +1,77 @@
+﻿@font-face{
+    font-family:Almarai;
+    src:url(../fonts/Almarai/Almarai-Regular.ttf)format('truetype');
+}
+@font-face{
+    font-family:Almarai-light;
+    src:url(../fonts/Almarai/Almarai-Light.ttf)format('truetype');
+}
+.TotalReport{
+    position:absolute;
+    height:300px;
+    padding:6px;
+    background:white;
+    box-shadow:0px 0px 7px lightgray;
+    border-radius:4px;
+}
+.TotalReport div{
+    margin-top:10px;
+    direction:rtl;
+}
+.TotalReport span{
+    padding:10px;
+    margin-left:4px ;
+    text-align:right;
+    float:right;
+    border-radius:3px;
+}
+.Waitting{
+    background:red;
+}
+.Success{
+    background:green;
+}
+.UnderReview{
+     background:#4d3e3e;
+}
+.UnderProcess{
+     background:#1c42a9;
+}
+.ToAdmin{
+     background:#ff6a00;
+}
+.Opened{
+     background:#b0aaaa;
+}
+.Monitor{
+    direction:ltr;
+}
+.MonitorleftBar{
+    position:absolute;
+    margin:0px;
+    margin-left:-130px;
+    color:white;
+    font-family:Almarai-light;
+    text-align:center;
+    background:#405175;
+    border-radius:4px;
+    z-index:1000;
+}
+.MonitorleftBar ul{
+    padding:0px;
+    list-style:none;
+    width:100%;
+}
+.MonitorleftBar ul li{
+    padding:4px;
+    cursor:pointer;
+    transition:background .5s;
+    width:100px;
+    border-bottom:1px solid white;
+}
+.MonitorleftBar ul li:hover{
+    background:#a9abb0;
+}
+.MonitorWindow{
+    direction:rtl;
+}
